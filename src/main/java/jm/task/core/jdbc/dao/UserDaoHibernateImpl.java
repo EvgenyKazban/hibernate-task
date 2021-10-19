@@ -2,6 +2,7 @@ package jm.task.core.jdbc.dao;
 
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.util.HibernateUtil;
+import org.hibernate.Query;
 import org.hibernate.Session;
 
 import java.util.List;
@@ -13,10 +14,14 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void createUsersTable() {
-        Session session = HibernateUtil.getInstance().getSessionFactory().openSession();
-        session.createSQLQuery("CREATE TABLE users " +
-                "(id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, name TEXT, lastName TEXT, age INTEGER)").executeUpdate();
-        session.close();
+        try {
+            Session session = HibernateUtil.getInstance().getSessionFactory().openSession();
+            session.createSQLQuery("CREATE TABLE users " +
+                    "(id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, name TEXT, lastName TEXT, age INTEGER)").executeUpdate();
+            session.close();
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
     }
 
     @Override
@@ -45,14 +50,16 @@ public class UserDaoHibernateImpl implements UserDao {
     public void removeUserById(long id) {
 
         Session session = HibernateUtil.getInstance().getSessionFactory().openSession();
-        session.createSQLQuery("DELETE FROM users WHERE id = " + id).executeUpdate();
+        String hql = "delete User where id = :id";
+        Query q = session.createQuery(hql).setParameter("id", id);
+        q.executeUpdate();
         session.close();
     }
 
     @Override
     public List<User> getAllUsers() {
         Session session = HibernateUtil.getInstance().getSessionFactory().openSession();
-        List<User> data = (List<User>) session.createCriteria(User.class).list();
+        List<User> data = (List<User>) session.createQuery("from User").list();
         session.close();
         return data;
     }
