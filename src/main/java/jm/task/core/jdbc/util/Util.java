@@ -8,8 +8,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class Util {
-    private static volatile Util instance;
-    private static final SessionFactory sessionFactory = buildSessionFactory();
+    private static SessionFactory sessionFactory;
 
     private static final String URL = "jdbc:mysql://localhost/task";
     private static final String USER = "root";
@@ -38,26 +37,19 @@ public class Util {
         }
     }
 
-    public static Util getInstance() {
-        Util localInstance = instance;
-        if (localInstance == null) {
+
+    //Hibernate session factory
+    public static SessionFactory getSessionFactory() {
+        SessionFactory localSessionFactory = sessionFactory;
+        if (localSessionFactory == null) {
             synchronized (Util.class) {
-                localInstance = instance;
-                if (localInstance == null) {
-                    instance = localInstance = new Util();
+                localSessionFactory = sessionFactory;
+                if (sessionFactory == null) {
+                    sessionFactory = localSessionFactory = buildSessionFactory();
                 }
             }
         }
-        return localInstance;
+        return localSessionFactory;
     }
 
-    //Hibernate session factory
-    public SessionFactory getSessionFactory() {
-        return sessionFactory;
-    }
-
-    //jdbc connection
-    public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(URL, USER, PASSWORD);
-    }
 }
